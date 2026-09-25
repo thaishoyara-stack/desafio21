@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6b7d5a">
+<meta name="description" content="Desafio 21 dias — sem doce, sem pão, hidratação, alimentação e progresso.">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Desafio 21 Dias</title>
+<style>
+:root{--bg:#f5f4ee;--card:#fff;--text:#263126;--muted:#6c746b;--accent:#6b7d5a;--soft:#e8eee2;--line:#dfe4dc;--ok:#52704b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:760px;margin:auto;padding:22px 16px 40px}
+header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:16px}
+h1{font-size:27px;margin:0 0 4px}h2{font-size:19px;margin:0 0 10px}.muted{color:var(--muted);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}
+.progress{height:10px;background:#e1e5df;border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:var(--accent);transition:.2s}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.big{font-size:24px;font-weight:700}.week{margin-top:18px}.days{display:grid;gap:10px}.day{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fff}.day.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--soft)}
+.day.done{background:#f0f5ed}.dayhead{display:flex;justify-content:space-between;gap:10px;align-items:center}
+button{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:11px;padding:10px 12px;font-weight:600;cursor:pointer;min-height:42px}
+button.primary{background:var(--accent);color:white;border-color:var(--accent)}button:active{transform:scale(.98)}
+.checks{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.check{font-size:12px;padding:7px 9px;border-radius:9px;background:#f1f3ef}
+.check.on{background:var(--soft);color:var(--ok);font-weight:700}
+.meal{font-size:13px;line-height:1.45;margin-top:8px}.meal b{color:#4e5b4d}
+.water{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.cup{min-height:48px;padding:8px 4px}
+.cup.on{background:var(--soft);border-color:var(--accent)}
+input{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:white;font-size:15px}
+label{font-size:13px;color:var(--muted);display:block}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
+@media(min-width:620px){.grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div><h1>🌿 Desafio 21 Dias</h1><div class="muted">28/09/2026 → 18/10/2026</div></div>
+<button id="install" class="primary" hidden>＋ Instalar</button>
+</header>
+
+<section class="card">
+<div class="dayhead"><div><div class="muted">PROGRESSO</div><div id="progressText" class="big">0/21 dias</div></div><div id="streak" class="muted">Comece hoje 💪</div></div>
+<div class="progress" style="margin-top:12px"><div id="bar" class="bar"></div></div>
+</section>
+
+<section class="grid">
+<div class="stat"><div class="muted">🍫 Sem doce</div><div id="sweetCount" class="big">0</div></div>
+<div class="stat"><div class="muted">🍞 Sem pão</div><div id="breadCount" class="big">0</div></div>
+<div class="stat"><div class="muted">💧 Água hoje</div><div id="waterCount" class="big">0/10</div></div>
+<div class="stat"><div class="muted">🏋️ Movimento</div><div id="moveCount" class="big">0</div></div>
+</section>
+
+<section class="card">
+<h2>💧 Água — 2,36 L por dia</h2>
+<div class="muted">10 copos de 236 ml. Toque em cada copo conforme beber.</div>
+<div id="water" class="water" style="margin-top:12px"></div>
+</section>
+
+<section id="weeks"></section>
+
+<section class="card">
+<h2>📊 Acompanhamento</h2>
+<div class="formgrid">
+<label>Peso (kg)<input id="weight" inputmode="decimal" placeholder="Ex.: 60"></label>
+<label>Barriga (cm)<input id="waist" inputmode="decimal" placeholder="Ex.: 80"></label>
+<label>Inchaço (0–10)<input id="bloat" inputmode="numeric" placeholder="Ex.: 4"></label>
+<label>Vontade de doce (0–10)<input id="craving" inputmode="numeric" placeholder="Ex.: 6"></label>
+</div>
+<div style="margin-top:10px"><label>Observações<textarea id="notes" rows="3" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font:inherit" placeholder="Como foi seu dia?"></textarea></label></div>
+</section>
+
+<section class="card">
+<h2>🏆 Marcos</h2>
+<div id="milestones" class="muted">Complete os dias para desbloquear 7, 14 e 21 dias.</div>
+</section>
+
+<footer>Seu progresso fica salvo neste aparelho. O desafio é consistência, não perfeição. 🌱</footer>
+</main>
+<script>
+const meals=[
+["2 ovos + banana + café","Arroz + feijão + frango + salada","Iogurte + chia + banana","Omelete + legumes"],
+["Ovos mexidos + mamão","Arroz + feijão + carne + salada","Maçã + iogurte","Frango + batata + legumes"],
+["Iogurte + whey + banana + chia","Arroz + feijão + frango + legumes","Maçã + castanhas","Omelete + salada"],
+["2 ovos + banana + café","Arroz + feijão + carne + salada","Iogurte + fruta","Frango + mandioca + legumes"],
+["Ovos + mamão + café","Arroz + feijão + peixe + salada","Banana + pasta de amendoim sem açúcar","Omelete + legumes"],
+["Iogurte + banana + chia + whey","Arroz + feijão + frango + salada","Maçã","Carne + batata + legumes"],
+["2 ovos + fruta + café","Arroz + feijão + carne + salada","Iogurte + chia","Sopa de legumes + frango"],
+["Ovos + banana + café","Arroz + feijão + frango + salada","Iogurte + chia","Omelete + legumes"],
+["Mamão + ovos","Arroz + feijão + carne + legumes","Maçã + castanhas","Frango + batata"],
+["Iogurte + whey + banana + chia","Arroz + feijão + peixe + salada","Fruta","Omelete + legumes"],
+["Ovos + mamão","Arroz + feijão + frango + legumes","Iogurte","Carne + mandioca + salada"],
+["Banana + ovos + café","Arroz + feijão + carne + salada","Maçã + pasta de amendoim sem açúcar","Frango + legumes"],
+["Iogurte + whey + fruta","Arroz + feijão + frango + salada","Fruta + castanhas","Omelete + legumes"],
+["Ovos + banana","Arroz + feijão + peixe + salada","Iogurte + chia","Sopa de legumes + frango"],
+["Ovos + mamão","Arroz + feijão + frango + salada","Iogurte + chia","Omelete"],
+["Banana + iogurte + whey","Arroz + feijão + carne + legumes","Maçã","Frango + batata"],
+["Ovos + fruta","Arroz + feijão + peixe + salada","Iogurte + chia","Carne + legumes"],
+["Mamão + ovos","Arroz + feijão + frango + legumes","Banana + pasta de amendoim sem açúcar","Omelete"],
+["Iogurte + banana + chia + whey","Arroz + feijão + carne + salada","Fruta + castanhas","Frango + mandioca"],
+["Ovos + banana + café","Arroz + feijão + peixe + legumes","Iogurte","Omelete + salada"],
+["Ovos + fruta + café","Refeição preferida dentro das regras","Iogurte + fruta + chia","Omelete + legumes"]
+];
+const dates=["28/09","29/09","30/09","01/10","02/10","03/10","04/10","05/10","06/10","07/10","08/10","09/10","10/10","11/10","12/10","13/10","14/10","15/10","16/10","17/10","18/10"];
+const KEY="desafio21-v1";
+let state=JSON.parse(localStorage.getItem(KEY)||"null")||{days:Array.from({length:21},()=>({sweet:false,bread:false,move:false,done:false})),water:Array(10).fill(false),metrics:{weight:"",waist:"",bloat:"",craving:"",notes:""}};
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function renderWater(){water.innerHTML="";state.water.forEach((on,i)=>{let b=document.createElement("button");b.className="cup"+(on?" on":"");b.textContent=(on?"✓ ":"")+"🥤 "+(i+1);b.onclick=()=>{state.water[i]=!state.water[i];save();render()};water.appendChild(b)});waterCount.textContent=state.water.filter(Boolean).length+"/10"}
+function renderDays(){
+weeks.innerHTML="";
+for(let w=0;w<3;w++){let sec=document.createElement("section");sec.className="week card";sec.innerHTML=`<h2>${["🌱 Semana 1 — adaptação","🔥 Semana 2 — constância","🏆 Semana 3 — reta final"][w]}</h2><div class="muted">Dias ${w*7+1}–${Math.min(w*7+7,21)}</div><div class="days"></div>`;let list=sec.querySelector(".days");
+for(let j=0;j<7&&w*7+j<21;j++){let i=w*7+j,d=state.days[i],el=document.createElement("div");el.className="day"+(d.done?" done":"");el.innerHTML=`<div class="dayhead"><div><b>Dia ${i+1} — ${dates[i]}</b><div class="meal"><b>Café:</b> ${meals[i][0]}<br><b>Almoço:</b> ${meals[i][1]}<br><b>Lanche:</b> ${meals[i][2]}<br><b>Jantar:</b> ${meals[i][3]}</div></div><button class="primary">${d.done?"✓ Feito":"Concluir dia"}</button></div><div class="checks"><button class="check ${d.sweet?"on":""}">🍫 ${d.sweet?"Sem doce ✓":"Sem doce"}</button><button class="check ${d.bread?"on":""}">🍞 ${d.bread?"Sem pão ✓":"Sem pão"}</button><button class="check ${d.move?"on":""}">🏋️ ${d.move?"Movimento ✓":"Movimento"}</button></div>`;
+el.querySelector(".primary").onclick=()=>{d.done=!d.done;save();render()};
+let bs=el.querySelectorAll(".check");bs[0].onclick=()=>{d.sweet=!d.sweet;save();render()};bs[1].onclick=()=>{d.bread=!d.bread;save();render()};bs[2].onclick=()=>{d.move=!d.move;save();render()};list.appendChild(el)}
+weeks.appendChild(sec)}}
+function render(){renderWater();renderDays();let done=state.days.filter(d=>d.done).length,sweet=state.days.filter(d=>d.sweet).length,bread=state.days.filter(d=>d.bread).length,move=state.days.filter(d=>d.move).length;progressText.textContent=done+"/21 dias";bar.style.width=(done/21*100)+"%";sweetCount.textContent=sweet;breadCount.textContent=bread;moveCount.textContent=move;streak.textContent=done?("Você já concluiu "+done+" dia"+(done>1?"s":"")+"! 💪"):"Comece hoje 💪";milestones.innerHTML=[7,14,21].map(n=>`<div style="margin:6px 0">${done>=n?"🏅":"🔒"} ${n} dias ${done>=n?"— conquistado!":"— continue!"}</div>`).join("")}
+["weight","waist","bloat","craving","notes"].forEach(id=>{let el=document.getElementById(id);el.value=state.metrics[id]||"";el.addEventListener("input",()=>{state.metrics[id]=el.value;save()})});
+render();
+let deferred=null;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;install.hidden=false});install.onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null;install.hidden=true}};
+if("serviceWorker"in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
