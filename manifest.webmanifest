@@ -1,0 +1,10 @@
+{
+  "name":"Desafio 21 Dias",
+  "short_name":"Desafio 21",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f5f4ee",
+  "theme_color":"#6b7d5a",
+  "lang":"pt-BR",
+  "description":"Desafio de 21 dias sem doce e sem pão, com hidratação, alimentação e acompanhamento."
+}
